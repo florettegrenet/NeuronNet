@@ -1,6 +1,95 @@
 #include "network.h"
 #include "random.h"
 
+
+
+std::set<size_t> Network::step(const std::vector<double>& thalam)
+{
+	
+	std::set<size_t> firing_neurones;
+	std::vector<bool>  bool_firing_neurons (neurons.size()); //pour se rappeller des neurones qui etaient en firing apres les avoir reset()
+	
+	double courant_I, somme_inhib, somme_exit;
+	
+	for (size_t i(0); i<neurons.size(); ++i) {
+		
+		if(neurons[i].firing()) {
+			firing_neurones.insert(i);
+			bool_firing_neurons.push_back(true);
+			neurons[i].reset();
+		}else{
+			bool_firing_neurons.push_back(false);
+		}
+	
+	
+	for (auto const& neigh : neighbors(i)) {
+		
+			if (bool_firing_neurons[neigh.first]) {
+						
+				if (neurons[neigh.first].is_inhibitory()){
+					somme_inhib += neigh.second; 
+				}else{
+					somme_exit += neigh.second;
+				}
+			}	
+		}
+	
+
+	if (neurons[i].is_inhibitory()) { //pas besoin de mettre le signe - pour les inhibiteurs car leurs intensite sont deja negatives
+		courant_I = 0.4*thalam[i] + somme_inhib + 0.5*somme_exit; 
+		}else{
+		courant_I = thalam[i] + somme_inhib + 0.5*somme_exit;
+		}
+		
+		
+	
+	neurons[i].input(courant_I);
+	neurons[i].step();
+	
+	}
+
+	return firing_neurones;
+	
+}
+	
+
+		
+	
+
+std::pair<size_t, double> Network::degree(const size_t& n) const 
+{
+	double intens_sum(0);
+	std::vector<std::pair<size_t, double> > neighbors_tab(neighbors(n));
+	
+	for (auto neighbor : neighbors_tab){
+		intens_sum += neighbor.second;
+	}
+
+	std::pair<size_t, double> res(neighbors_tab.size(), intens_sum);
+
+	return res;
+}
+
+
+
+
+std::vector<std::pair<size_t, double> > Network::neighbors(const size_t& n) const
+{
+	std::vector<std::pair<size_t, double> > res;
+	
+	std::pair<size_t, double> paire(n,0);
+	auto link_ = links.lower_bound(paire); //pointeur vers le premier qui a n
+	while(link_->first.first == n and link_->first.second < neurons.size() ) { //on itere sur ceux qui ont n (map sont ordonnees)
+		res.push_back(std::make_pair(link_->first.second, link_->second));
+		++link_;
+	}
+	
+	return res;
+}
+	
+	
+
+
 void Network::resize(const size_t &n, double inhib) {
     size_t old = size();
     neurons.resize(n);
