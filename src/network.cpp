@@ -46,6 +46,9 @@ std::set<size_t> Network::step(const std::vector<double>& thalam)
 	neurons[i].input(courant_I);
 	neurons[i].step();
 	
+	somme_inhib = 0;
+	somme_exit = 0;
+	
 	}
 
 	return firing_neurones;
@@ -78,9 +81,9 @@ std::vector<std::pair<size_t, double> > Network::neighbors(const size_t& n) cons
 	std::vector<std::pair<size_t, double> > res;
 	
 	std::pair<size_t, double> paire(n,0);
-	auto link_ = links.lower_bound(paire); //pointeur vers le premier qui a n
+	auto link_ = links.lower_bound(paire); //pointeur vers le premier de la map links qui a n
 	while(link_->first.first == n and link_->first.second < neurons.size() ) { //on itere sur ceux qui ont n (map sont ordonnees)
-		res.push_back(std::make_pair(link_->first.second, link_->second));
+		res.push_back(std::make_pair(link_->first.second, link_->second)); 
 		++link_;
 	}
 	
