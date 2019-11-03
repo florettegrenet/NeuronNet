@@ -9,9 +9,10 @@ std::set<size_t> Network::step(const std::vector<double>& thalam)
 	std::set<size_t> firing_neurones;
 	std::vector<bool>  bool_firing_neurons (neurons.size()); //pour se rappeller des neurones qui etaient en firing apres les avoir reset()
 	
-	double courant_I(0), somme_inhib(0), somme_exit(0);
 	
 	for (size_t i(0); i<neurons.size(); ++i) {
+		
+		double courant_I(0), somme_inhib(0), somme_exit(0);
 		
 		if(neurons[i].firing()) {
 			firing_neurones.insert(i);
@@ -46,8 +47,6 @@ std::set<size_t> Network::step(const std::vector<double>& thalam)
 	neurons[i].input(courant_I);
 	neurons[i].step();
 	
-	somme_inhib = 0;
-	somme_exit = 0;
 	
 	}
 
